@@ -12,4 +12,36 @@ ANetDemoGameMode::ANetDemoGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+	DecayRate = 0.05f;
+	PowerDrainDelay = 0.25f;
+}
+
+void ANetDemoGameMode::BeginPlay()
+{
+	GetWorldTimerManager().SetTimer(PowerDrainTimer, this, &ANetDemoGameMode::DrainPowerOverTime, PowerDrainDelay, true);
+}
+
+float ANetDemoGameMode::GetDecacyRate()
+{
+	return DecayRate;
+}
+
+void ANetDemoGameMode::DrainPowerOverTime()
+{
+	UWorld* World = GetWorld();
+	check(World);
+	for (FConstControllerIterator It = World->GetControllerIterator(); It; It++)
+	{
+		if (APlayerController* PlayerController = Cast<APlayerController>(*It))
+		{
+			if (ANetDemoCharacter* TestCharacter = Cast<ANetDemoCharacter>(PlayerController->GetPawn()))
+			{
+				TestCharacter->UpdatePower(-PowerDrainDelay*DecayRate*TestCharacter->GetInitalPower());
+			}
+		}
+	}
+
+
+
 }
