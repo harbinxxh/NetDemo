@@ -51,6 +51,9 @@ ANetDemoCharacter::ANetDemoCharacter()
 	InitialPower = 2000.f;
 	CurrentPower = InitialPower;
 
+	BaseSpeed = 10.f;
+	SpeedFactor = 1.f;
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
@@ -78,6 +81,9 @@ void ANetDemoCharacter::UpdatePower(float Delta)
 	if (Role = ROLE_Authority)
 	{
 		CurrentPower += Delta;
+		//模拟调用同步事件
+		OnRep_CurrentPower();
+		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * CurrentPower;
 	}
 }
 
@@ -219,4 +225,9 @@ void ANetDemoCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ANetDemoCharacter::OnRep_CurrentPower()
+{
+	PowerChangeEffect();
 }

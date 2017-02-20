@@ -84,8 +84,14 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Power", meta = (BlueprintProtected = "true"))
 	float InitialPower;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Power", meta = (BlueprintProtected = "true"))
-		float CurrentPower;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", meta = (BlueprintProtected = "true"))
+	float BaseSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", meta = (BlueprintProtected =  "true"))
+	float SpeedFactor;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Power")
+	void PowerChangeEffect();
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -98,5 +104,11 @@ public:
 private:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Spwning", meta = (AllowPrivateAccess = "true"))
 	float CollectionShpereRadius;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentPower, VisibleAnywhere, Category = "Power")
+	float CurrentPower;
+
+	UFUNCTION()
+	void OnRep_CurrentPower();
 };
 
