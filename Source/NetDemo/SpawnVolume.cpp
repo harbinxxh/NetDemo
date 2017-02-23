@@ -54,6 +54,24 @@ FVector ASpawnVolume::GetRandomPointInVolume()
 	return FVector();
 }
 
+void ASpawnVolume::SetSPawningActive(bool b)
+{
+	if (Role == ROLE_Authority)
+	{
+		if (b)
+		{
+			// 激活生成电池
+			SpawnDelay = FMath::FRandRange(SpawnDelayRangeLow, SpawnDelayRangeHight);
+			GetWorldTimerManager().SetTimer(SpawnTimer, this, &ASpawnVolume::SpawnPickup, SpawnDelay, false);
+		}
+		else
+		{
+			//不激活电池
+			GetWorldTimerManager().ClearTimer(SpawnTimer);
+		}
+	}
+}
+
 void ASpawnVolume::SpawnPickup()
 {
 	if (Role == ROLE_Authority && WhereToSpawn != NULL)
@@ -73,8 +91,7 @@ void ASpawnVolume::SpawnPickup()
 
 			APickup* const SpawnPickup = world->SpawnActor<APickup>(WhatToSpawn, SpawnLocation, SpawnRotation, SpawnParams);
 
-			SpawnDelay = FMath::FRandRange(SpawnDelayRangeLow, SpawnDelayRangeHight);
-			GetWorldTimerManager().SetTimer(SpawnTimer, this, &ASpawnVolume::SpawnPickup, SpawnDelay, false);
+			SetSPawningActive(true);
 		}
 	}
 }

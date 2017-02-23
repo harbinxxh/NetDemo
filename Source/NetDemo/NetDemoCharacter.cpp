@@ -87,6 +87,32 @@ void ANetDemoCharacter::UpdatePower(float Delta)
 	}
 }
 
+void ANetDemoCharacter::OnPlayerDeath_Implementation()
+{
+	//和Pawn断开
+	DetachFromControllerPendingDestroy();
+
+	//Ragdoll
+	if (GetMesh())
+	{
+		GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
+	}
+	SetActorEnableCollision(true);
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->WakeAllRigidBodies();
+	GetMesh()->bBlendPhysics = true;
+
+	//运动失效
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->SetComponentTickEnabled(false);
+
+	//让人物碰撞体失效
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 

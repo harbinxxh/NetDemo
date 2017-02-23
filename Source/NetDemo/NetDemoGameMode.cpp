@@ -4,6 +4,8 @@
 #include "NetDemoGameMode.h"
 #include "NetDemoCharacter.h"
 #include "NetDemoGameState.h"
+#include "SpawnVolume.h"
+
 
 ANetDemoGameMode::ANetDemoGameMode()
 {
@@ -40,7 +42,17 @@ void ANetDemoGameMode::BeginPlay()
 
 	DeadPlayerCount = 0;
 
-	MyGameState->SetCurrentState(EBatteryPlayState::EPlaying);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(World, ASpawnVolume::StaticClass(), FoundActors);
+	for (auto Actor : FoundActors)
+	{
+		if (ASpawnVolume* Test = Cast<ASpawnVolume>(Actor))
+		{
+			SpawnVolumeActors.AddUnique(Test);
+		}
+	}
+
+	HandleNewState(EBatteryPlayState::EPlaying);
 
 	for (FConstControllerIterator It = World->GetControllerIterator(); It; It++)
 	{
@@ -82,7 +94,7 @@ void ANetDemoGameMode::DrainPowerOverTime()
 			{
 				if (TestCharacter->GetCurrentPower() > MyGameState->PowerToWin)
 				{
-					MyGameState->SetCurrentState(EBatteryPlayState::EWon);
+					HandleNewState(EBatteryPlayState::EWon);
 				}
 				else if (TestCharacter->GetCurrentPower() > 0)
 				{
@@ -91,19 +103,57 @@ void ANetDemoGameMode::DrainPowerOverTime()
 				else
 				{
 					//Player Over
-					TestCharacter->DetachFromControllerPendingDestroy();
+					TestCharacter->OnPlayerDeath();
 					DeadPlayerCount += 1;
 
 					// Game Over
 					if (DeadPlayerCount >= GetNumPlayers())
 					{
-						MyGameState->SetCurrentState(EBatteryPlayState::EGameOver);
+						HandleNewState(EBatteryPlayState::EGameOver);
 					}
 				}
 			}
 		}
 	}
+}
 
+void ANetDemoGameMode::HandleNewState(EBatteryPlayState NewState)
+{
+	UWorld* World = GetWorld();
+	check(World);
 
+	ANetDemoGameState* MyGameState = Cast<ANetDemoGameState>(GameState);
+	check(MyGameState);
+
+	if (NewState != MyGameState->GetCurrentState())
+	{
+		MyGameState->SetCurrentState(NewState);
+		switch (NewState)
+		{
+		case EPlaying:
+			for (ASpawnVolume* SpawnVolum : SpawnVolumeActors)
+			{
+				SpawnVolum->SetSPawningActive(true);
+			}
+			break;
+		case EGameOver:
+			for (ASpawnVolume* SpawnVolum : SpawnVolumeActors)
+			{
+				SpawnVolum->SetSPawningActive(false);
+			}
+			break;
+		case EWon:
+			for (ASpawnVolume* SpawnVolum : SpawnVolumeActors)
+			{
+				SpawnVolum->SetSPawningActive(false);
+			}
+			break;
+		case EUnknown:
+			
+			break;
+		default:
+			break;
+		}
+	}
 
 }

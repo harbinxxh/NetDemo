@@ -41,6 +41,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Power")
 	void UpdatePower(float Delta);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void OnPlayerDeath();
+
 protected:
 
 	/** Resets HMD orientation in VR. */

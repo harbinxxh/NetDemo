@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spawning")
 	FVector GetRandomPointInVolume();
 
+	UFUNCTION(BlueprintCallable, Category = "Spawning")
+	void SetSPawningActive(bool b);
+
 	FTimerHandle SpawnTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
@@ -43,5 +46,4 @@ private:
 
 	void SpawnPickup();
 	float SpawnDelay;
-
 };

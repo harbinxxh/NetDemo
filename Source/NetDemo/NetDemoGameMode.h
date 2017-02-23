@@ -1,6 +1,7 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "GameFramework/GameMode.h"
+#include "NetDemoGameState.h"
 #include "NetDemoGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -37,6 +38,9 @@ protected:
 private:
 	void DrainPowerOverTime();
 
+	TArray<class ASpawnVolume*> SpawnVolumeActors;
+
+	void HandleNewState(EBatteryPlayState NewState);
 };
 
 
