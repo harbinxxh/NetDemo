@@ -32,7 +32,9 @@ ANetDemoGameMode::ANetDemoGameMode()
 
 void ANetDemoGameMode::BeginPlay()
 {
-	GetWorldTimerManager().SetTimer(PowerDrainTimer, this, &ANetDemoGameMode::DrainPowerOverTime, PowerDrainDelay, true);
+	Super::BeginPlay();
+
+	
 
 	UWorld* World = GetWorld();
 	check(World);
@@ -94,6 +96,7 @@ void ANetDemoGameMode::DrainPowerOverTime()
 			{
 				if (TestCharacter->GetCurrentPower() > MyGameState->PowerToWin)
 				{
+					MyGameState->WinningPlayerName = TestCharacter->GetName();
 					HandleNewState(EBatteryPlayState::EWon);
 				}
 				else if (TestCharacter->GetCurrentPower() > 0)
@@ -135,18 +138,21 @@ void ANetDemoGameMode::HandleNewState(EBatteryPlayState NewState)
 			{
 				SpawnVolum->SetSPawningActive(true);
 			}
+			GetWorldTimerManager().SetTimer(PowerDrainTimer, this, &ANetDemoGameMode::DrainPowerOverTime, PowerDrainDelay, true);
 			break;
 		case EGameOver:
 			for (ASpawnVolume* SpawnVolum : SpawnVolumeActors)
 			{
 				SpawnVolum->SetSPawningActive(false);
 			}
+			GetWorldTimerManager().ClearTimer(PowerDrainTimer);
 			break;
 		case EWon:
 			for (ASpawnVolume* SpawnVolum : SpawnVolumeActors)
 			{
 				SpawnVolum->SetSPawningActive(false);
 			}
+			GetWorldTimerManager().ClearTimer(PowerDrainTimer);
 			break;
 		case EUnknown:
 			
